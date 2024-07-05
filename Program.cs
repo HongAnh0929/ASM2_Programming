@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.Linq;
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,41 +11,70 @@ namespace ASM1._1
 {
     internal class Program
     {
+        static List<string> customerNames = new List<string>();
         static void Main(string[] args)
         {
-            string customer_name = GetCustomerName();
+            do
+            {
+                string customer_name = GetCustomerName();
+                customerNames.Add(customer_name);
 
-            double lastmonth = 0;
-            double thismonth = 0;
+                double lastmonth = 0;
+                double thismonth = 0;
 
-            double water_consumption = GetConsumption(out lastmonth, out thismonth);
-            Console.WriteLine("Water consumption:  " + water_consumption + "m3");
+                double water_consumption = GetConsumption(out lastmonth, out thismonth);
+                Console.WriteLine("Water consumption:  " + water_consumption + "m3");
 
-            string type = GetCustomerType();
-            Console.WriteLine("Customer type: " + type);
+                string type = GetCustomerType();
+                Console.WriteLine("Customer type: " + type);
 
-            double water_bill = GetWaterBill(type, water_consumption);
-            Console.WriteLine("Water bill = " + water_bill + "VND");
+                double price = GetUnitPrice(type, water_consumption);
+                Console.WriteLine("Unit price: " + price + "VND/m3");
 
-            double evm = GetEnvironment(water_bill);
-            Console.WriteLine("Environment = " + evm + "VND");
+                double water_bill = GetWaterBill(type, water_consumption);
+                Console.WriteLine("Water bill = " + water_bill + "VND");
 
-            double total_bill = GetTotalBill(water_bill, evm);
-            Console.WriteLine("Total bill = " + total_bill + "VND");
+                double evm = GetEnvironment(water_bill);
+                Console.WriteLine("Environment = " + evm + "VND");
 
-            double VAT = GetVAT(total_bill);
-            Console.WriteLine("VAT = " + VAT + "VND");
+                double total_bill = GetTotalBill(water_bill, evm);
+                Console.WriteLine("Total bill = " + total_bill + "VND");
 
-            double total_amount = GetTotalAmount(total_bill, evm);
-            Console.WriteLine("Total amount = " + total_amount + "VND");
+                double VAT = GetVAT(total_bill);
+                Console.WriteLine("VAT = " + VAT + "VND");
 
-            PrintInvoice(customer_name, lastmonth, thismonth, type, water_bill, total_amount);
+                double total_amount = GetTotalAmount(total_bill, evm);
+                Console.WriteLine("Total amount = " + total_amount + "VND");
 
-            Console.WriteLine("Press any key to continue.....");
+                PrintInvoice(customer_name, lastmonth, thismonth, type, water_bill, total_amount);
 
-            Console.ReadLine();
+                Console.WriteLine("Do you want to print the invoice? (yes/no)");
+                string printinvoicechoice = Console.ReadLine().ToLower();
 
-            Console.Clear();
+                if (printinvoicechoice == "yes")
+                {
+                    Console.Clear();
+                    PrintSingleInvoice(customer_name, lastmonth, thismonth, type, water_consumption, price, water_bill, VAT, evm, total_bill, total_amount);
+                }
+                else if (printinvoicechoice == "no")
+                {
+                    Console.WriteLine("Invoice not printed");
+                }
+
+                Console.WriteLine("Do you want to continue? (yes/no)");
+                string continuechoice = Console.ReadLine().ToLower();
+
+                if (continuechoice != "yes")
+                {
+                    break;
+                }
+
+                Console.ReadLine();
+
+                Console.Clear();
+
+            }
+            while (true);
         }
 
         static string GetCustomerName()
@@ -110,6 +140,46 @@ namespace ASM1._1
             while (!isVaild);
 
             return consumption;
+        }
+
+        static double GetUnitPrice(string type, double water_consumption)
+        {
+            double price = 0;
+
+            switch (type)
+            {
+                case "1":
+                    if (water_consumption <= 10)
+                    {
+                        price = 5973;
+                        break;
+                    }
+                    else if (water_consumption > 10 && water_consumption <= 20)
+                    {
+                        price = 7052;
+                        break;
+                    }
+                    else if (water_consumption > 20 && water_consumption <= 30)
+                    {
+                        price = 8699;
+                        break;
+                    }
+                    else
+                    {
+                        price = 15929;
+                    }
+                    break;
+                case "2":
+                    price = 9955;
+                    break;
+                case "3":
+                    price = 11615;
+                    break;
+                case "4":
+                    price = 22068;
+                    break;
+            }
+            return price;
         }
 
         static double GetWaterBill(string type, double water_consumption)
@@ -199,6 +269,38 @@ namespace ASM1._1
             Console.WriteLine("Customer type: " + type);
             Console.WriteLine("Amount of water consumed: " + water_bill + "VND");
             Console.WriteLine("Total amount: " + total_amount + "VND");
+        }
+
+        static void PrintSingleInvoice(string customer_name, double lastmonth, double thismonth, string type, double water_consumption, double price, double water_bill, double VAT, double evm, double total_bill, double total_amount)
+        {
+            Console.WriteLine("ABC SOfTWARE COMPANY                                                      CONTACT PHONE");
+            Console.WriteLine("                                                                          Customer care       :028.39552652");
+            Console.WriteLine("                                                                          Repair              :028.39552650");
+            Console.WriteLine("                                                                          Room KD Q.10        :028.39552649");
+            Console.WriteLine("                                                                          Room KD Q.11        :028.39552651");
+            Console.WriteLine("                                                                                                           ");
+            Console.WriteLine("                                          WATER COST NOTICE                                                ");
+            Console.WriteLine("                                                                                                           ");
+            Console.WriteLine("CUSTOMER NAME: " + customer_name);
+            Console.WriteLine("ADDRESS: ");
+            Console.WriteLine("Last month's water meter readings: " + lastmonth);
+            Console.WriteLine("This month's water meter readings: " + thismonth);
+            Console.WriteLine("Customer type: " + type);
+            Console.WriteLine("---------------------------------------------------------------------------------------------------------------");
+            Console.WriteLine("|1.Water fee                                                                                                   |");
+            Console.WriteLine("---------------------------------------------------------------------------------------------------------------");
+            Console.WriteLine("| Water consumption (m3)  |  Unit price | Amount of water consumed |       VAT (10%)       |     Total bill    |");
+            Console.WriteLine("---------------------------------------------------------------------------------------------------------------");
+            Console.WriteLine("|" + water_consumption + "|" + price + "|"      + water_bill   +  "|"       + VAT +       "|"      + VAT +    "|");
+            Console.WriteLine("---------------------------------------------------------------------------------------------------------------");
+            Console.WriteLine("|2. Service Fees and Drainage and Wastewater Treatment                                                         |");
+            Console.WriteLine("---------------------------------------------------------------------------------------------------------------");
+            Console.WriteLine("| Water consumption (m3) |   Unit price | Amount of water consumed | Environment fee (10%) |      Total bill   |");
+            Console.WriteLine("---------------------------------------------------------------------------------------------------------------|");
+            Console.WriteLine("|" + water_consumption +"|" +  price + "|"     + water_bill +     "|" +       evm       + "|" + total_bill +  "|");
+            Console.WriteLine("---------------------------------------------------------------------------------------------------------------");
+            Console.WriteLine("|                                                                  |    Total amount       |" + total_amount +"|");
+            Console.WriteLine("---------------------------------------------------------------------------------------------------------------");
         }
     }
 }
