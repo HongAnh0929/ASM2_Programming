@@ -364,6 +364,9 @@ namespace ASM2._1
 
                 form3.Show();
             }
-        }
+            else 
+            {
+                 MessageBox.Show("You have not entered any information yet!", "Notice", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
     }
 }
